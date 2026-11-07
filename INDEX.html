@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TKB | فهرست وظایف</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap');
+:root{--green:#159879;--dark:#173d33;--muted:#82958d;--line:#e3eee9;--bg:#f7faf8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--dark);font-family:"Vazirmatn",Tahoma,sans-serif}
+main{max-width:1120px;margin:34px auto;padding:0 22px 42px}
+.network{position:relative}
+.core{width:112px;height:112px;margin:0 auto 34px;border-radius:50%;background:#fff;border:1px solid #cce8dc;box-shadow:0 0 0 8px #edf8f3,0 0 0 9px #d9eee5;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;z-index:2}
+.core strong{font-size:25px;letter-spacing:2px}.core span{font-size:9px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;position:relative}
+.grid:before{content:"";position:absolute;top:-35px;bottom:0;left:50%;border-left:1px dashed #cfe4da;z-index:0}
+.module{background:#fff;border:1px solid var(--line);border-radius:13px;padding:15px;position:relative;z-index:1;box-shadow:0 5px 18px rgba(28,75,57,.035)}
+.module:before{content:"";position:absolute;top:-16px;left:50%;height:16px;border-left:1px solid #cfe4da}
+.module-head{display:flex;align-items:center;gap:9px;padding-bottom:11px;border-bottom:1px solid #edf3f0;margin-bottom:8px}
+.icon{width:30px;height:30px;border-radius:9px;background:#eaf7f1;color:var(--green);display:grid;place-items:center;font-size:15px;flex:none}
+.module-head h2{font-size:12px;margin:0;font-weight:700}
+.module-head small{display:block;font-size:8px;color:#9aaba3;letter-spacing:1px;margin-top:2px}
+.task{display:flex;align-items:flex-start;gap:8px;padding:8px 5px;border-bottom:1px solid #f1f5f3;cursor:pointer}
+.task:last-child{border-bottom:0}
+.task input{appearance:none;width:15px;height:15px;border:1.5px solid #c8d8d0;border-radius:4px;margin:2px 0 0;flex:none;cursor:pointer;position:relative}
+.task input:checked{background:var(--green);border-color:var(--green)}
+.task input:checked:after{content:"✓";position:absolute;color:#fff;font-size:11px;line-height:13px;left:2px;top:0}
+.task-title{font-size:10px;line-height:1.8;flex:1}
+.task-time{font-size:9px;color:#9aaba3;white-space:nowrap;padding-top:2px}
+.task input:checked+.task-title{text-decoration:line-through;color:#9aaba3}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){main{margin:22px auto;padding:0 13px 30px}.grid{grid-template-columns:1fr;gap:12px}.grid:before,.module:before{display:none}.core{margin-bottom:25px}}
+</style>
+</head>
+<body>
+<main>
+  <section class="network">
+    <div class="core"><strong>TKB</strong><span>هسته محصول</span></div>
+    <div class="grid" id="taskGrid"></div>
+  </section>
+</main>
+<script>
+const modules=[
+{title:"تحلیل و معماری",en:"FOUNDATION",icon:"⌘",tasks:[
+["جمع‌آوری نیازمندی‌ها و محدوده نسخه اول",6],["طراحی معماری ماژولار و ساختار پوشه‌ها",8],["طراحی مدل داده و ارتباط موجودیت‌ها",8],["طراحی سیستم رابط کاربری و کامپوننت‌ها",10]]},
+{title:"حساب کاربری و احراز هویت",en:"IDENTITY",icon:"◎",tasks:[
+["ثبت‌نام مشتری عادی و همکار تجاری",8],["تأیید شماره موبایل با کد یک‌بارمصرف",6],["دریافت مدارک و اطلاعات کسب‌وکار همکار",6],["ورود، خروج، بازیابی و سطح دسترسی",8]]},
+{title:"داشبورد و بازار",en:"MARKET",icon:"▥",tasks:[
+["صفحه اصلی و داشبورد کاربر",8],["نمایش قیمت طلا، دلار و یوان",8],["نمودار تغییرات قیمت و بازه‌های زمانی",10],["مدیریت منبع و به‌روزرسانی قیمت‌ها",6]]},
+{title:"تراکنش‌ها و حساب مالی",en:"TRANSACTIONS",icon:"⇄",tasks:[
+["فهرست تراکنش‌ها و جست‌وجو",8],["جزئیات و رسید تراکنش",6],["نمای کلی حساب و گردش مالی",8],["مدیریت و بررسی تراکنش‌ها توسط مدیر",8]]},
+{title:"سفارش و پیگیری",en:"ORDERS",icon:"▤",tasks:[
+["ثبت درخواست یا سفارش",10],["چرخه وضعیت و پیگیری سفارش",8],["تاریخچه سفارش‌های کاربر",6],["پنل مدیریت سفارش‌ها",10]]},
+{title:"پنل مدیریت",en:"ADMINISTRATION",icon:"▦",tasks:[
+["داشبورد مدیریتی و شاخص‌ها",8],["بررسی و تأیید حساب همکاران",8],["مدیریت کاربران، نقش‌ها و دسترسی‌ها",8],["گزارش فعالیت مدیران و کاربران",6]]},
+{title:"مجله و محتوای آنلاین",en:"CONTENT",icon:"▧",tasks:[
+["صفحه مجله و فهرست مطالب",6],["صفحه جزئیات مقاله و رسانه",6],["اسلایدر و بنرهای صفحه اصلی",4],["مدیریت محتوا و انتشار مطالب",6]]},
+{title:"بک‌اند و API",en:"BACKEND SERVICES",icon:"⌁",tasks:[
+["طراحی قرارداد API و مستندات",8],["پیاده‌سازی سرویس احراز هویت",10],["پیاده‌سازی منطق سفارش و تراکنش",16],["ذخیره‌سازی امن فایل و داده",8]]},
+{title:"امنیت، تست و انتشار",en:"QUALITY & RELEASE",icon:"⬡",tasks:[
+["بازبینی امنیت و حریم خصوصی",10],["تست ماژول‌ها و سناریوهای کاربری",12],["تست نمایش در موبایل و دسکتاپ",6],["استقرار نسخه وب و پایش اولیه",8]]},
+{title:"آماده‌سازی و خروجی Flutter",en:"FLUTTER DELIVERY",icon:"◈",tasks:[
+["تثبیت قرارداد داده مشترک وب و اپ",6],["ساخت پروژه Flutter و معماری ماژولار",8],["پیاده‌سازی صفحات اصلی در Flutter",24],["اتصال API، تست و خروجی اندروید",12]]}
+];
+const key="tkb-simple-task-checks";
+const checked=JSON.parse(localStorage.getItem(key)||"{}");
+const grid=document.getElementById("taskGrid");
+modules.forEach((m,mi)=>{
+ const card=document.createElement("article");card.className="module";
+ const head=document.createElement("div");head.className="module-head";
+ head.innerHTML=`<span class="icon">${m.icon}</span><div><h2>${m.title}</h2><small>${m.en}</small></div>`;
+ card.appendChild(head);
+ m.tasks.forEach((t,ti)=>{
+  const id=`${mi}-${ti}`,row=document.createElement("label");row.className="task";
+  const input=document.createElement("input");input.type="checkbox";input.checked=!!checked[id];
+  input.addEventListener("change",()=>{checked[id]=input.checked;localStorage.setItem(key,JSON.stringify(checked))});
+  const title=document.createElement("span");title.className="task-title";title.textContent=t[0];
+  const time=document.createElement("span");time.className="task-time";time.textContent=`${new Intl.NumberFormat("fa-IR").format(t[1])} ساعت`;
+  row.append(input,title,time);card.appendChild(row);
+ });
+ grid.appendChild(card);
+});
+</script>
+</body>
+</html>
