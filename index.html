@@ -10,6 +10,13 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--dark);font-family:"Vazirmatn",Tahoma,sans-serif}
 main{max-width:1120px;margin:34px auto;padding:0 22px 42px}
+
+/* نوار پیشرفت */
+.progress-box{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 20px;margin-bottom:25px;box-shadow:0 4px 12px rgba(0,0,0,.03)}
+.progress-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px;font-weight:700}
+.progress-bar-bg{width:100%;height:10px;background:#edf5f1;border-radius:20px;overflow:hidden}
+.progress-bar-fill{height:100%;width:0%;background:var(--green);border-radius:20px;transition:width .3s ease}
+
 .network{position:relative}
 .core{width:112px;height:112px;margin:0 auto 34px;border-radius:50%;background:#fff;border:1px solid #cce8dc;box-shadow:0 0 0 8px #edf8f3,0 0 0 9px #d9eee5;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative;z-index:2}
 .core strong{font-size:25px;letter-spacing:2px}.core span{font-size:9px;color:var(--muted)}
@@ -35,6 +42,17 @@ main{max-width:1120px;margin:34px auto;padding:0 22px 42px}
 </head>
 <body>
 <main>
+  <!-- نوار پیشرفت -->
+  <section class="progress-box">
+    <div class="progress-info">
+      <span>پیشرفت کل پروژه</span>
+      <span id="progressText">۰٪</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+  </section>
+
   <section class="network">
     <div class="core"><strong>TKB</strong><span>هسته محصول</span></div>
     <div class="grid" id="taskGrid"></div>
@@ -63,24 +81,82 @@ const modules=[
 {title:"آماده‌سازی و خروجی Flutter",en:"FLUTTER DELIVERY",icon:"◈",tasks:[
 ["تثبیت قرارداد داده مشترک وب و اپ",6],["ساخت پروژه Flutter و معماری ماژولار",8],["پیاده‌سازی صفحات اصلی در Flutter",24],["اتصال API، تست و خروجی اندروید",12]]}
 ];
-const key="tkb-simple-task-checks";
-const checked=JSON.parse(localStorage.getItem(key)||"{}");
-const grid=document.getElementById("taskGrid");
-modules.forEach((m,mi)=>{
- const card=document.createElement("article");card.className="module";
- const head=document.createElement("div");head.className="module-head";
- head.innerHTML=`<span class="icon">${m.icon}</span><div><h2>${m.title}</h2><small>${m.en}</small></div>`;
- card.appendChild(head);
- m.tasks.forEach((t,ti)=>{
-  const id=`${mi}-${ti}`,row=document.createElement("label");row.className="task";
-  const input=document.createElement("input");input.type="checkbox";input.checked=!!checked[id];
-  input.addEventListener("change",()=>{checked[id]=input.checked;localStorage.setItem(key,JSON.stringify(checked))});
-  const title=document.createElement("span");title.className="task-title";title.textContent=t[0];
-  const time=document.createElement("span");time.className="task-time";time.textContent=`${new Intl.NumberFormat("fa-IR").format(t[1])} ساعت`;
-  row.append(input,title,time);card.appendChild(row);
- });
- grid.appendChild(card);
-});
+
+// نقطه اتصال هم‌زمان و سراسری (تست آنلاین رایگان)
+const API_URL = "https://api.jsonbin.io/v3/b/661000000000000000000000"; 
+let checked = {};
+let totalTaskCount = 0;
+
+modules.forEach(m => totalTaskCount += m.tasks.length);
+
+const grid = document.getElementById("taskGrid");
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+
+function toFaNum(n) {
+  return new Intl.NumberFormat("fa-IR").format(n);
+}
+
+function updateProgress() {
+  const doneCount = Object.values(checked).filter(Boolean).length;
+  const percent = Math.round((doneCount / totalTaskCount) * 100) || 0;
+  progressBar.style.width = percent + "%";
+  progressText.textContent = toFaNum(percent) + "٪";
+}
+
+function render() {
+  grid.innerHTML = "";
+  modules.forEach((m, mi) => {
+    const card = document.createElement("article"); card.className = "module";
+    const head = document.createElement("div"); head.className = "module-head";
+    head.innerHTML = `<span class="icon">${m.icon}</span><div><h2>${m.title}</h2><small>${m.en}</small></div>`;
+    card.appendChild(head);
+
+    m.tasks.forEach((t, ti) => {
+      const id = `${mi}-${ti}`;
+      const row = document.createElement("label"); row.className = "task";
+      const input = document.createElement("input"); input.type = "checkbox"; input.checked = !!checked[id];
+      
+      input.addEventListener("change", () => {
+        checked[id] = input.checked;
+        updateProgress();
+        saveGlobalData();
+      });
+
+      const title = document.createElement("span"); title.className = "task-title"; title.textContent = t[0];
+      const time = document.createElement("span"); time.className = "task-time"; time.textContent = `${toFaNum(t[1])} ساعت`;
+      row.append(input, title, time);
+      card.appendChild(row);
+    });
+    grid.appendChild(card);
+  });
+  updateProgress();
+}
+
+// دریافت وضعیت تیک‌ها از سرور به محض باز شدن صفحه
+async function loadGlobalData() {
+  try {
+    const res = await fetch(API_URL + "/latest");
+    if (res.ok) {
+      const data = await res.json();
+      checked = data.record || {};
+    }
+  } catch(e) {}
+  render();
+}
+
+// ذخیره سراسری وضعیت جدید
+async function saveGlobalData() {
+  try {
+    await fetch(API_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(checked)
+    });
+  } catch(e) {}
+}
+
+loadGlobalData();
 </script>
 </body>
 </html>
